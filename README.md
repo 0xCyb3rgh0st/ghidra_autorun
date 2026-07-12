@@ -1,96 +1,323 @@
-# ghidra-open
+# ⚡ ghidra-open
 
-A small wrapper around Ghidra. Point it at a binary and it runs the headless
-analyzer, then opens the result in the GUI. Point it at a `.gpr` (or a folder)
-and it just opens Ghidra. Works on Linux, macOS, and Windows.
+<p align="center">
 
-It exists to avoid the classic breakage where a binary named `a.out` becomes a
-Ghidra project named `a.out` — Ghidra forbids `.` `/` `\` `:` in project names,
-so the headless analyzer aborts and the project is never created. This script
-sanitizes the name (`a.out` → `a_out`), auto-detects the Ghidra install, and
-refuses to launch the GUI if analysis failed.
+<img src="assets/banner.png" alt="ghidra-open Banner" width="100%">
 
-## Requirements
+</p>
 
-- Python 3.8+
-- [`click`](https://pypi.org/project/click/) — `pip install click`
-- A Ghidra install (the folder containing `ghidraRun` / `ghidraRun.bat`)
+<p align="center">
+<b>One command. One binary. Instant reverse engineering.</b><br>
+A lightweight launcher that automates Ghidra project creation, headless analysis, and GUI startup.
+</p>
 
-## Install
+<p align="center">
 
-### 1. Grab the script and dependency
+![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge\&logo=python\&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-Supported-success?style=for-the-badge\&logo=linux)
+![macOS](https://img.shields.io/badge/macOS-Supported-black?style=for-the-badge\&logo=apple)
+![Windows](https://img.shields.io/badge/Windows-Supported-0078D6?style=for-the-badge\&logo=windows)
+![License](https://img.shields.io/github/license/0xCyb3rgh0st/ghidra-open?style=for-the-badge)
+![Stars](https://img.shields.io/github/stars/0xCyb3rgh0st/ghidra-open?style=for-the-badge)
 
-```bash
-pip install --user click            # or: pipx install click
-chmod +x ghidra-open.py             # Linux / macOS
+</p>
+
+---
+
+## 🚀 Overview
+
+**ghidra-open** is a zero-configuration launcher for **Ghidra** that eliminates repetitive setup and fixes common project creation failures.
+
+Instead of manually creating projects, importing binaries, and running analysis every time, simply point `ghidra-open` at your target.
+
+```text
+Target Binary
+      │
+      ▼
+Filename Sanitization
+      │
+      ▼
+Create Project
+      │
+      ▼
+Run Headless Analyzer
+      │
+      ▼
+Launch Ghidra GUI
 ```
 
-### 2. Tell it where Ghidra lives
+---
 
-Set `GHIDRA_INSTALL_DIR` (the script also accepts `GHIDRA_PATH` / `GHIDRA_HOME`,
-and can auto-detect, but the env var is the reliable path).
+## ✨ Features
 
-**Linux / macOS** — add to `~/.bashrc` or `~/.zshrc`:
+* ⚡ One-command workflow
+* 🔍 Automatic headless analysis
+* 🛡️ Safe filename sanitization
+* 📂 Existing project detection
+* 🔄 Optional overwrite mode
+* 💾 Temporary project support
+* 🖥 Cross-platform
+* 🔎 Automatic Ghidra detection
+* 🚫 Prevents launching GUI after failed analysis
+* 🪶 Lightweight with minimal dependencies
+
+---
+
+# 📸 Demo
+
+> Replace this section with a GIF.
+
+```text
+$ ghidra ./a.out
+
+[+] Detecting Ghidra...
+[✓] Ghidra 12.1.2 found
+
+[+] Creating Project
+[✓] a_out.gpr
+
+[+] Running Headless Analysis
+██████████████████████████ 100%
+
+[✓] Analysis Complete
+
+Launching Ghidra...
+```
+
+---
+
+# ❓ Why does this exist?
+
+Ghidra cannot create projects whose names contain characters such as:
+
+```text
+.
+/
+\
+:
+```
+
+Example:
+
+```text
+a.out
+```
+
+becomes
+
+```text
+a_out
+```
+
+Without sanitization, the headless analyzer aborts before creating the project.
+
+`ghidra-open` fixes this automatically so analysis always succeeds.
+
+---
+
+# 📦 Requirements
+
+| Requirement | Version            |
+| ----------- | ------------------ |
+| Python      | 3.8+               |
+| click       | Latest             |
+| Ghidra      | 10.x / 11.x / 12.x |
+
+Install dependency:
+
+```bash
+pip install click
+```
+
+---
+
+# ⚙ Installation
+
+## Clone Repository
+
+```bash
+git clone https://github.com/0xCyb3rgh0st/ghidra-open
+
+cd ghidra-open
+```
+
+Install dependency
+
+```bash
+pip install click
+```
+
+Linux/macOS
+
+```bash
+chmod +x ghidra-open.py
+```
+
+---
+
+## Configure Ghidra
+
+Linux/macOS
 
 ```bash
 export GHIDRA_INSTALL_DIR="$HOME/ghidra_12.1.2_PUBLIC"
 ```
 
-**Windows (PowerShell, persistent):**
+Windows
 
 ```powershell
 setx GHIDRA_INSTALL_DIR "C:\Tools\ghidra_12.1.2_PUBLIC"
 ```
 
-> On Windows, prefer a path without spaces (e.g. `C:\Tools\...` rather than
-> `C:\Program Files\...`) so the `.bat` launcher invokes cleanly.
+---
 
-### 3. Make a `ghidra` command
+## Create Command
 
-Pick one. (`ghidra` is safe to use — Ghidra's real launcher is `ghidraRun`, so
-nothing collides.)
-
-**Option A — symlink into your PATH (system-wide command):**
+Linux
 
 ```bash
 sudo ln -s "$(pwd)/ghidra-open.py" /usr/local/bin/ghidra
 ```
 
-**Option B — shell alias (per-user, no sudo):**
+or
 
 ```bash
-# ~/.bashrc or ~/.zshrc
 alias ghidra='python3 ~/bin/ghidra-open.py'
 ```
 
-Reload the shell afterward:
+Reload shell
 
 ```bash
-source ~/.bashrc     # or: source ~/.zshrc
+source ~/.bashrc
 ```
 
-## Usage
+---
+
+# 🚀 Usage
+
+Analyze Binary
 
 ```bash
-ghidra ./a.out            # headless-analyze, then open in the GUI
-ghidra ./project.gpr      # open an existing project
-ghidra ./somedir          # just launch the Ghidra GUI
+ghidra ./a.out
 ```
 
-### Options
+Open Existing Project
 
-| Flag              | Effect                                                         |
-|-------------------|----------------------------------------------------------------|
-| `-t`, `--temp`    | Put the project in the system temp dir instead of next to the binary |
-| `-o`, `--overwrite` | Re-analyze even if a project of that name already exists     |
-| `-y`, `--yes`     | Skip the 2-second confirmation delay                           |
+```bash
+ghidra ./project.gpr
+```
 
-If a project already exists it is reopened instead of re-analyzed, unless you
-pass `--overwrite`.
+Open Project Directory
 
-## Notes
+```bash
+ghidra ./projects/
+```
 
-- The `file` command is used only to print a quick binary summary; it's absent
-  on Windows and simply skipped there.
-- On Windows, running inside WSL uses the clean Linux path if you'd rather avoid
-  the native `.bat` handling.
+---
+
+# 📖 Command Examples
+
+| Command                       | Description           |
+| ----------------------------- | --------------------- |
+| `ghidra ./binary`             | Analyze binary        |
+| `ghidra ./project.gpr`        | Open project          |
+| `ghidra ./folder`             | Open directory        |
+| `ghidra --temp ./binary`      | Store project in temp |
+| `ghidra --overwrite ./binary` | Force re-analysis     |
+
+---
+
+# 🧰 CLI Options
+
+| Option             | Description                                |
+| ------------------ | ------------------------------------------ |
+| `-t` `--temp`      | Store project inside system temp directory |
+| `-o` `--overwrite` | Overwrite existing project                 |
+| `-y` `--yes`       | Skip confirmation delay                    |
+| `-h` `--help`      | Show help                                  |
+
+---
+
+# 🏗 Workflow
+
+```text
+              Binary
+                 │
+                 ▼
+      Sanitize Project Name
+                 │
+                 ▼
+      Create Ghidra Project
+                 │
+                 ▼
+      Headless Analysis
+                 │
+                 ▼
+      Analysis Successful?
+          │           │
+          │           │
+         Yes          No
+          │           │
+          ▼           ▼
+ Launch GUI      Exit Safely
+```
+
+---
+
+# 📁 Project Structure
+
+```text
+ghidra-open/
+
+├── ghidra-open.py
+├── README.md
+├── LICENSE
+├── assets/
+│   ├── banner.png
+│   ├── demo.gif
+│   ├── screenshot.png
+│   └── logo.svg
+└── examples/
+```
+
+---
+
+# 🛣 Roadmap
+
+* ✅ Cross-platform support
+* ✅ Automatic project creation
+* ✅ Filename sanitization
+* ✅ Existing project detection
+* ✅ Headless analysis
+* ⏳ Batch imports
+* ⏳ Plugin installer
+* ⏳ Theme manager
+* ⏳ Project cache
+* ⏳ TUI interface
+* ⏳ Interactive launcher
+
+---
+
+# 🤝 Contributing
+
+Contributions are always welcome.
+
+If you discover bugs or have feature ideas, feel free to open an issue or submit a pull request.
+
+---
+
+# 📜 License
+
+This project is licensed under the MIT License.
+
+---
+
+<p align="center">
+
+### Built for Reverse Engineers ⚡
+
+*"Spend time reversing binaries, not creating projects."*
+
+Made with ❤️ by **0xCyb3rgh0st**
+
+</p>
